@@ -343,6 +343,21 @@
   }
 
   async function loadNewsSection() {
+    const container = document.getElementById('newsContainer');
+    const detailContainer = document.getElementById('newsDetailContainer');
+    if (container) {
+      container.innerHTML = `
+        <div class="p-3 bg-black/20 rounded-lg text-neutral-400 text-sm">
+          Loading news...
+        </div>
+      `;
+    }
+    if (detailContainer) {
+      detailContainer.innerHTML = `
+        <div class="text-neutral-400 text-sm">Loading news details...</div>
+      `;
+    }
+
     try {
       const newsResp = await fetch('/api/news');
       if (!newsResp.ok) {
@@ -356,6 +371,46 @@
       console.error('Error loading news:', error);
       displayNews([]);
     }
+  }
+
+  const AFFECTED_STOCK_ALIAS_MAP = {
+    APPLE: 'AAPL',
+    MICROSOFT: 'MSFT',
+    GOOGLE: 'GOOGL',
+    ALPHABET: 'GOOGL',
+    TESLA: 'TSLA',
+    AMAZON: 'AMZN',
+    NVIDIA: 'NVDA',
+    FACEBOOK: 'META',
+    COINBASE: 'COIN'
+  };
+
+  const NON_TICKER_NEWS_WORDS = new Set([
+    'THE', 'WITH', 'FROM', 'THIS', 'THAT', 'WILL', 'MARKET', 'NEWS', 'TODAY',
+    'Q1', 'Q2', 'Q3', 'Q4', 'FED', 'USA', 'US', 'CEO', 'CFO', 'GDP', 'CPI', 'PPI', 'ETF'
+  ]);
+
+  function sanitizeAffectedStocks(rawAffectedStocks) {
+    const rawList = Array.isArray(rawAffectedStocks)
+      ? rawAffectedStocks
+      : typeof rawAffectedStocks === 'string'
+        ? rawAffectedStocks.split(',')
+        : [];
+
+    const cleaned = rawList
+      .map((value) => String(value || '').trim().toUpperCase().replace(/^\$/, ''))
+      .map((value) => {
+        const compact = value.replace(/[^A-Z0-9]/g, '');
+        return AFFECTED_STOCK_ALIAS_MAP[compact] || value;
+      })
+      .filter((value) => /^[A-Z]{1,5}$/.test(value) && !NON_TICKER_NEWS_WORDS.has(value));
+
+    return [...new Set(cleaned)].slice(0, 8);
+  }
+
+  function formatAffectedStocks(rawAffectedStocks) {
+    const stocks = sanitizeAffectedStocks(rawAffectedStocks);
+    return stocks.length > 0 ? stocks.join(', ') : '--';
   }
 
   function displayCourses(courses) {
@@ -555,7 +610,7 @@
         <p class="text-neutral-400 text-sm mt-2">
           Impact: <span class="px-2 py-1 rounded bg-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-500/20 text-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-400">${item.impact}</span>
         </p>
-        <p class="text-neutral-400 text-sm mt-2">Affected Stocks: ${Array.isArray(item.affectedStocks) && item.affectedStocks.length > 0 ? item.affectedStocks.join(', ') : 'N/A'}</p>
+        <p class="text-neutral-400 text-sm mt-2">Affected Stocks: ${formatAffectedStocks(item.affectedStocks)}</p>
       </div>
     `).join('');
   }
