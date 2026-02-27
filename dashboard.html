@@ -170,6 +170,7 @@
       <!-- News Section -->
       <section id="news">
         <h3 class="text-2xl font-semibold mb-6">📰 Financial News Intelligence</h3>
+        <div id="newsAlertContainer" class="space-y-3 mb-6"></div>
         <div class="bg-white/5 border border-white/10 rounded-3xl p-8" id="newsDetailContainer">
           <!-- News details will be loaded here -->
         </div>
@@ -183,6 +184,8 @@
 <script>
   let stockChart = null;
   let currentAiPractice = null;
+  const MAJOR_NEWS_ALERT_CACHE_KEY = 'majorNewsAlertsSeen';
+  const majorNewsAlertedIds = loadAlertedNewsIds();
 
   // Load user data
   function loadUserData() {
@@ -451,6 +454,72 @@
     scoreEl.textContent = `Score: ${correct}/${questions.length}`;
   }
 
+  function loadAlertedNewsIds() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MAJOR_NEWS_ALERT_CACHE_KEY) || '[]');
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch (error) {
+      return new Set();
+    }
+  }
+
+  function saveAlertedNewsIds() {
+    localStorage.setItem(MAJOR_NEWS_ALERT_CACHE_KEY, JSON.stringify(Array.from(majorNewsAlertedIds)));
+  }
+
+  function getMajorEventKey(item) {
+    return item?._id || `${item?.title || 'untitled'}-${item?.date || ''}`;
+  }
+
+  function isMajorMarketEvent(item) {
+    const title = (item?.title || '').toLowerCase();
+    const content = (item?.content || '').toLowerCase();
+    const impact = (item?.impact || '').toLowerCase();
+    const sentiment = Number(item?.sentiment);
+    const text = `${title} ${content}`;
+    const hasMajorKeyword = /(fed|interest rate|inflation|recession|war|sanction|earnings miss|earnings beat|bankruptcy|default|merger|acquisition|sec|regulation|tariff)/.test(text);
+    const strongImpact = impact === 'positive' || impact === 'negative';
+    const extremeSentiment = !Number.isNaN(sentiment) && (sentiment <= 0.2 || sentiment >= 0.8);
+
+    return hasMajorKeyword || (strongImpact && extremeSentiment);
+  }
+
+  function sendMajorNewsNotification(item) {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    const key = getMajorEventKey(item);
+    if (majorNewsAlertedIds.has(key)) return;
+
+    new Notification('Major Market Event Detected', {
+      body: item?.title || 'A major market event has been detected in the news feed.',
+    });
+
+    majorNewsAlertedIds.add(key);
+    saveAlertedNewsIds();
+  }
+
+  function renderMajorNewsAlerts(news) {
+    const alertContainer = document.getElementById('newsAlertContainer');
+    if (!alertContainer) return;
+
+    const majorEvents = (Array.isArray(news) ? news : []).filter(isMajorMarketEvent).slice(0, 3);
+    if (!majorEvents.length) {
+      alertContainer.innerHTML = '';
+      return;
+    }
+
+    alertContainer.innerHTML = majorEvents.map(item => `
+      <div class="p-4 rounded-xl border border-red-500/30 bg-red-500/10">
+        <p class="text-red-300 text-xs font-semibold">MAJOR MARKET ALERT</p>
+        <p class="text-sm font-semibold mt-1">${item.title}</p>
+        <p class="text-xs text-neutral-300 mt-1">Impact: ${item.impact || 'Mixed'} | Sentiment: ${item.sentiment ?? 'N/A'}</p>
+      </div>
+    `).join('');
+
+    majorEvents.forEach(sendMajorNewsNotification);
+  }
+
   function displayNews(news) {
     const container = document.getElementById('newsContainer');
     if (!Array.isArray(news) || news.length === 0) {
@@ -459,12 +528,18 @@
           No news available right now.
         </div>
       `;
+      const alertContainer = document.getElementById('newsAlertContainer');
+      if (alertContainer) {
+        alertContainer.innerHTML = '';
+      }
       const detailContainer = document.getElementById('newsDetailContainer');
       detailContainer.innerHTML = `
         <div class="text-neutral-400 text-sm">No detailed news available right now.</div>
       `;
       return;
     }
+
+    renderMajorNewsAlerts(news);
 
     container.innerHTML = news.slice(0, 3).map(item => `
       <div class="p-3 bg-black/20 rounded-lg">

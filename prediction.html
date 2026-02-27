@@ -174,7 +174,7 @@
 
       <!-- Explanation Section -->
       <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
-        <h3 class="font-semibold text-lg mb-4">📊 Analysis & Explanation</h3>
+        <h3 class="font-semibold text-lg mb-4">Simple Analysis</h3>
         <p id="explanation" class="text-neutral-400 leading-relaxed">
           Loading explanation...
         </p>
@@ -399,11 +399,11 @@
     document.getElementById('actualResult').textContent = data.actualResult || '?';
     document.getElementById('resultStatus').textContent = `Market moved ${Number(data.priceChange || 0).toFixed(2)}%`;
     document.getElementById('explanation').textContent =
-      analysis.summary || data.explanation || 'Analysis unavailable';
+      buildBeginnerExplanation(data, analysis, userPred, confidence);
 
-    // Add AI insight
+    // Add beginner-friendly AI insight
     document.getElementById('aiInsight').textContent =
-      `${analysis.rationale || 'Model factors unavailable.'} Horizon: ${analysis.horizon || 'Next session'}. Volatility risk: ${analysis.volatilityRisk ?? '--'}/100.`;
+      buildBeginnerInsight(analysis);
 
     // Show success/failure badge
     const badge = document.getElementById('resultBadge');
@@ -419,6 +419,25 @@
     document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
   }
 
+
+  function buildBeginnerExplanation(data, analysis, userPred, confidence) {
+    const marketMove = Number(data.priceChange || 0).toFixed(2);
+    const moveDirection = Number(data.priceChange || 0) >= 0 ? 'up' : 'down';
+    const aiSide = data.aiPrediction || 'Unknown';
+    const actual = data.actualResult || 'Unknown';
+    const resultText = data.isCorrect ? 'You were correct.' : 'This one missed.';
+    const simpleSummary = data.isCorrect
+      ? 'Your direction matched what the market actually did.'
+      : 'Your direction was opposite to what the market actually did.';
+
+    return `${resultText} You predicted ${userPred} with ${confidence}% confidence. AI predicted ${aiSide}. Final result was ${actual}, and price moved ${moveDirection} by ${Math.abs(Number(marketMove)).toFixed(2)}%. ${simpleSummary}`;
+  }
+
+  function buildBeginnerInsight(analysis) {
+    const horizon = analysis.horizon || 'next trading session';
+    const risk = analysis.volatilityRisk ?? '--';
+    return `AI usually checks recent price trend and news mood to guess direction. Time window: ${horizon}. Risk level: ${risk}/100 (higher means less certainty).`;
+  }
   // Load predictions on page load
   async function loadPredictionHistory() {
     if (!localStorage.getItem('token')) return;
@@ -455,3 +474,4 @@
 
 </body>
 </html>
+
