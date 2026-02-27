@@ -48,6 +48,9 @@
           class="w-full mb-8 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
                  focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
                  outline-none transition duration-300 placeholder:text-neutral-400" required>
+        <p id="passwordHelp" class="text-xs text-neutral-400 -mt-5 mb-6">
+          Use at least 8 characters with letters, numbers, and special characters.
+        </p>
 
         <!-- Agreement -->
         <div class="mb-6 flex items-start gap-3">
@@ -80,12 +83,45 @@
   </div>
 
   <script>
+    function isStrongPassword(password) {
+      if (typeof password !== 'string') return false;
+      const hasMinLength = password.length >= 8;
+      const hasLetter = /[A-Za-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[^A-Za-z0-9]/.test(password);
+      return hasMinLength && hasLetter && hasNumber && hasSpecial;
+    }
+
+    const passwordInput = document.getElementById('password');
+    const passwordHelp = document.getElementById('passwordHelp');
+
+    passwordInput.addEventListener('input', () => {
+      if (!passwordInput.value) {
+        passwordHelp.textContent = 'Use at least 8 characters with letters, numbers, and special characters.';
+        passwordHelp.className = 'text-xs text-neutral-400 -mt-5 mb-6';
+        return;
+      }
+
+      if (isStrongPassword(passwordInput.value)) {
+        passwordHelp.textContent = 'Strong password.';
+        passwordHelp.className = 'text-xs text-green-400 -mt-5 mb-6';
+      } else {
+        passwordHelp.textContent = 'Weak password. Add numbers and special characters.';
+        passwordHelp.className = 'text-xs text-red-400 -mt-5 mb-6';
+      }
+    });
+
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+
+      if (!isStrongPassword(password)) {
+        alert('Password must be at least 8 characters and include letters, numbers, and special characters.');
+        return;
+      }
 
       try {
         const response = await fetch('/api/auth/register', {

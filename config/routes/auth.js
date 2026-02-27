@@ -16,6 +16,15 @@ demoDatabase["demo@example.com"] = {
   password: demoPassword,
 };
 
+function isStrongPassword(password) {
+  if (typeof password !== "string") return false;
+  const hasMinLength = password.length >= 8;
+  const hasLetter = /[A-Za-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+  return hasMinLength && hasLetter && hasNumber && hasSpecial;
+}
+
 // Register
 router.post("/register", (req, res) => {
   try {
@@ -27,6 +36,13 @@ router.post("/register", (req, res) => {
       return res
         .status(400)
         .json({ error: "Please provide name, email and password" });
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters and include letters, numbers, and special characters.",
+      });
     }
 
     // Check if user exists
