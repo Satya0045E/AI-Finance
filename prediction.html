@@ -53,12 +53,6 @@
           </div>
         </div>
 
-        <!-- Prediction Confidence -->
-        <div>
-          <label class="block text-neutral-400 text-sm mb-2"></label>
-          <input type="range" id="confidence" min="1" max="100" value="50" class="w-full">
-          <p class="text-sm text-purple-400 mt-2 text-center"><span id="confValue">50</span>%</p>
-        </div>
       </div>
 
       <!-- Prediction Buttons -->
@@ -76,7 +70,7 @@
       </div>
 
       <p class="text-neutral-400 text-sm">Make your prediction and we'll compare it with AI-generated analysis</p>
-      <div class="mt-6 bg-black/40 border border-white/10 rounded-2xl p-5">
+      <div id="modelForecastCard" class="hidden mt-6 bg-black/40 border border-white/10 rounded-2xl p-5">
         <p class="text-neutral-400 text-sm">ML Forecast (Selected Stock)</p>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-2">
           <p class="text-xl font-semibold">
@@ -154,7 +148,6 @@
         <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
           <p class="text-neutral-400 text-sm">Your Prediction</p>
           <p id="yourPred" class="text-3xl font-bold mt-2 text-purple-400">UP</p>
-          <p class="text-neutral-400 text-sm mt-2">Confidence: <span id="yourConf">75</span>%</p>
         </div>
 
         <!-- AI Prediction -->
@@ -234,34 +227,10 @@
     }
 
     const symbol = document.getElementById('symbol').value;
+    document.getElementById('modelForecastCard').classList.add('hidden');
     await loadStockInfo(symbol);
     await loadPriceChart(symbol);
-    await loadModelPrediction(symbol);
     loadPredictionHistory();
-  }
-
-  async function loadModelPrediction(symbol) {
-    try {
-      const response = await fetch(`/api/predictions/model/${symbol}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to load model forecast');
-      }
-
-      const forecast = await response.json();
-      document.getElementById('modelPred').textContent = forecast.aiPrediction || '?';
-      document.getElementById('modelPred').className =
-        forecast.aiPrediction === 'UP' ? 'text-green-400' : 'text-red-400';
-      document.getElementById('modelConf').textContent = forecast.aiConfidence ?? '--';
-      document.getElementById('modelRationale').textContent =
-        forecast.rationale || 'Model forecast generated from trend and sentiment features.';
-    } catch (error) {
-      console.error('Error loading model prediction:', error);
-      document.getElementById('modelPred').textContent = '?';
-      document.getElementById('modelConf').textContent = '--';
-      document.getElementById('modelRationale').textContent = 'Unable to load model forecast right now.';
-    }
   }
 
   // Load stock information
@@ -347,11 +316,6 @@
     }
   }
 
-  // Update confidence display
-  document.getElementById('confidence').addEventListener('input', (e) => {
-    document.getElementById('confValue').textContent = e.target.value;
-  });
-
   // Update chart when symbol changes
   document.getElementById('symbol').addEventListener('change', loadStockData);
 
@@ -362,8 +326,6 @@
     }
 
     const symbol = document.getElementById('symbol').value;
-    const confidence = document.getElementById('confidence').value;
-
     try {
       const response = await fetch('/api/predictions/', {
         method: 'POST',
@@ -381,25 +343,32 @@
       if (!response.ok) {
         throw new Error(data.error || 'Prediction request failed');
       }
-      displayResults(data, direction, confidence);
+      displayResults(data, direction);
     } catch (error) {
       alert('Error submitting prediction: ' + error.message);
     }
   }
 
-  function displayResults(data, userPred, confidence) {
+  function displayResults(data, userPred) {
     document.getElementById('resultsSection').classList.remove('hidden');
     const analysis = data.analysis || {};
+    const forecastCard = document.getElementById('modelForecastCard');
+    forecastCard.classList.remove('hidden');
 
     // Update prediction displays
     document.getElementById('yourPred').textContent = userPred;
-    document.getElementById('yourConf').textContent = confidence;
     document.getElementById('aiPred').textContent = data.aiPrediction || '?';
     document.getElementById('aiConf').textContent = data.aiConfidence || '?';
+    document.getElementById('modelPred').textContent = data.aiPrediction || '?';
+    document.getElementById('modelPred').className =
+      data.aiPrediction === 'UP' ? 'text-green-400' : 'text-red-400';
+    document.getElementById('modelConf').textContent = data.aiConfidence || '--';
+    document.getElementById('modelRationale').textContent =
+      analysis.summary || data.reasoning || 'Model forecast generated from trend and sentiment features.';
     document.getElementById('actualResult').textContent = data.actualResult || '?';
     document.getElementById('resultStatus').textContent = `Market moved ${Number(data.priceChange || 0).toFixed(2)}%`;
     document.getElementById('explanation').textContent =
-      buildBeginnerExplanation(data, analysis, userPred, confidence);
+      buildBeginnerExplanation(data, analysis, userPred);
 
     // Add beginner-friendly AI insight
     document.getElementById('aiInsight').textContent =
@@ -420,7 +389,7 @@
   }
 
 
-  function buildBeginnerExplanation(data, analysis, userPred, confidence) {
+  function buildBeginnerExplanation(data, analysis, userPred) {
     const marketMove = Number(data.priceChange || 0).toFixed(2);
     const moveDirection = Number(data.priceChange || 0) >= 0 ? 'up' : 'down';
     const aiSide = data.aiPrediction || 'Unknown';
@@ -430,7 +399,7 @@
       ? 'Your direction matched what the market actually did.'
       : 'Your direction was opposite to what the market actually did.';
 
-    return `${resultText} You predicted ${userPred} with ${confidence}% confidence. AI predicted ${aiSide}. Final result was ${actual}, and price moved ${moveDirection} by ${Math.abs(Number(marketMove)).toFixed(2)}%. ${simpleSummary}`;
+    return `${resultText} You predicted ${userPred}. AI predicted ${aiSide}. Final result was ${actual}, and price moved ${moveDirection} by ${Math.abs(Number(marketMove)).toFixed(2)}%. ${simpleSummary}`;
   }
 
   function buildBeginnerInsight(analysis) {
