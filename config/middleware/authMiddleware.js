@@ -8,7 +8,13 @@ const authMiddleware = (req, res, next) => {
       return res.status(401).json({ error: "No token provided" });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || "your_jwt_secret_key_change_this_in_production";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: JWT_SECRET is missing" });
+    }
+
     const decoded = jwt.verify(token, jwtSecret);
     req.userId = decoded.userId;
     next();

@@ -13,7 +13,7 @@ demoDatabase["demo@example.com"] = {
   id: "demo123",
   name: "Demo User",
   email: "demo@example.com",
-  password: demoPassword
+  password: demoPassword,
 };
 
 // Register
@@ -24,7 +24,9 @@ router.post("/register", (req, res) => {
     console.log("Register request:", { name, email });
 
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "Please provide name, email and password" });
+      return res
+        .status(400)
+        .json({ error: "Please provide name, email and password" });
     }
 
     // Check if user exists
@@ -47,7 +49,13 @@ router.post("/register", (req, res) => {
     console.log("User created:", userId);
 
     // Create JWT
-    const jwtSecret = process.env.JWT_SECRET || "your_jwt_secret_key_change_this_in_production";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: JWT_SECRET is missing" });
+    }
+
     const token = jwt.sign({ userId }, jwtSecret, {
       expiresIn: "7d",
     });
@@ -93,7 +101,13 @@ router.post("/login", (req, res) => {
     console.log("Login successful for:", email);
 
     // Create JWT
-    const jwtSecret = process.env.JWT_SECRET || "your_jwt_secret_key_change_this_in_production";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: JWT_SECRET is missing" });
+    }
+
     const token = jwt.sign({ userId: user.id }, jwtSecret, {
       expiresIn: "7d",
     });
