@@ -458,10 +458,52 @@ function getModelState() {
 }
 
 function inferTickersFromText(text = "") {
-  const matches = (text.toUpperCase().match(/\b[A-Z]{2,5}\b/g) || []).filter(
-    (token) => !["THE", "WITH", "FROM", "THIS", "THAT", "WILL", "MARKET"].includes(token)
+  const upperText = (text || "").toUpperCase();
+  const aliasMap = {
+    APPLE: "AAPL",
+    MICROSOFT: "MSFT",
+    GOOGLE: "GOOGL",
+    ALPHABET: "GOOGL",
+    TESLA: "TSLA",
+    AMAZON: "AMZN",
+    NVIDIA: "NVDA",
+    META: "META",
+    FACEBOOK: "META",
+    COINBASE: "COIN",
+  };
+  const blocked = new Set([
+    "THE",
+    "WITH",
+    "FROM",
+    "THIS",
+    "THAT",
+    "WILL",
+    "MARKET",
+    "NEWS",
+    "TODAY",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "FED",
+    "USA",
+    "US",
+    "CEO",
+    "CFO",
+    "GDP",
+    "CPI",
+    "PPI",
+    "ETF",
+  ]);
+
+  const aliases = Object.entries(aliasMap)
+    .filter(([name]) => upperText.includes(name))
+    .map(([, symbol]) => symbol);
+  const explicit = (upperText.match(/\b[A-Z]{1,5}\b/g) || []).filter(
+    (token) => token && /[A-Z]/.test(token) && !blocked.has(token)
   );
-  return [...new Set(matches)].slice(0, 5);
+
+  return [...new Set([...aliases, ...explicit])].slice(0, 5);
 }
 
 function generateFinanceReply(message) {

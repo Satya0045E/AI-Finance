@@ -6,8 +6,69 @@ const { apiKey, fetchFinancialNews } = require("../models/finnhub");
 
 const router = express.Router();
 
+const COMPANY_ALIAS_TO_TICKER = {
+  APPLE: "AAPL",
+  MICROSOFT: "MSFT",
+  GOOGLE: "GOOGL",
+  ALPHABET: "GOOGL",
+  TESLA: "TSLA",
+  AMAZON: "AMZN",
+  NVIDIA: "NVDA",
+  META: "META",
+  FACEBOOK: "META",
+  COINBASE: "COIN",
+};
+
+const NON_TICKER_TOKENS = new Set([
+  "THE",
+  "WITH",
+  "FROM",
+  "THIS",
+  "THAT",
+  "WILL",
+  "MARKET",
+  "NEWS",
+  "TODAY",
+  "Q1",
+  "Q2",
+  "Q3",
+  "Q4",
+  "FED",
+  "USA",
+  "US",
+  "CEO",
+  "CFO",
+  "GDP",
+  "CPI",
+  "PPI",
+  "ETF",
+]);
+
 function isDbConnected() {
   return mongoose.connection.readyState === 1;
+}
+
+function normalizeTickerToken(rawToken = "") {
+  const token = String(rawToken || "").trim().toUpperCase().replace(/^\$/, "");
+  if (!token) return null;
+
+  const compact = token.replace(/[^A-Z0-9]/g, "");
+  if (COMPANY_ALIAS_TO_TICKER[compact]) {
+    return COMPANY_ALIAS_TO_TICKER[compact];
+  }
+
+  if (/^[A-Z]{1,5}$/.test(token) && !NON_TICKER_TOKENS.has(token)) {
+    return token;
+  }
+
+  return null;
+}
+
+function normalizeAffectedStocks(values = []) {
+  const normalized = (Array.isArray(values) ? values : [])
+    .map((value) => normalizeTickerToken(value))
+    .filter(Boolean);
+  return [...new Set(normalized)].slice(0, 8);
 }
 
 function getDefaultNews() {
@@ -51,7 +112,7 @@ function getDefaultNews() {
       content:
         "Bitcoin surges past $50,000 as institutional adoption accelerates.",
       impact: "Positive",
-      affectedStocks: ["MSTR", "CoinBase", "RIOT"],
+      affectedStocks: ["MSTR", "COIN", "RIOT"],
       sentiment: 0.75,
       source: "CoinDesk",
       date: new Date(Date.now() - 10800000),
@@ -87,7 +148,10 @@ async function getLiveFinancialNews(limit = 20) {
       const related = typeof item.related === "string"
         ? item.related.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
-      const affectedStocks = related.length > 0 ? related : inferTickersFromText(combined);
+      const fromRelated = normalizeAffectedStocks(related);
+      const fromText = inferTickersFromText(combined);
+      const affectedStocks =
+        fromRelated.length > 0 ? fromRelated : normalizeAffectedStocks(fromText);
 
       return {
         id: item.id || `live_${index}_${Date.now()}`,
@@ -140,15 +204,14 @@ router.post("/", async (req, res) => {
       req.body;
     const combinedText = `${title || ""} ${content || ""}`.trim();
     const mlSentiment = analyzeFinanceSentiment(combinedText);
+    const normalizedProvided = normalizeAffectedStocks(affectedStocks);
+    const inferred = normalizeAffectedStocks(inferTickersFromText(combinedText));
 
     const news = new News({
       title,
       content,
       impact: impact || mlSentiment.impact,
-      affectedStocks:
-        Array.isArray(affectedStocks) && affectedStocks.length > 0
-          ? affectedStocks
-          : inferTickersFromText(combinedText),
+      affectedStocks: normalizedProvided.length > 0 ? normalizedProvided : inferred,
       sentiment: typeof sentiment === "number" ? sentiment : mlSentiment.sentiment,
       source,
     });

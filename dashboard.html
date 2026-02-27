@@ -555,7 +555,7 @@
         <p class="text-neutral-400 text-sm mt-2">
           Impact: <span class="px-2 py-1 rounded bg-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-500/20 text-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-400">${item.impact}</span>
         </p>
-        <p class="text-neutral-400 text-sm mt-2">Affected Stocks: ${Array.isArray(item.affectedStocks) ? item.affectedStocks.join(', ') : 'N/A'}</p>
+        <p class="text-neutral-400 text-sm mt-2">Affected Stocks: ${Array.isArray(item.affectedStocks) && item.affectedStocks.length > 0 ? item.affectedStocks.join(', ') : 'N/A'}</p>
       </div>
     `).join('');
   }
