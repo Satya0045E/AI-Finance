@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - AI Finance Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    .floating { animation: float 7s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen flex items-center justify-center relative overflow-hidden">
+  <!-- Background Glow -->
+  <div class="absolute w-[800px] h-[800px] bg-purple-700/20 rounded-full blur-3xl top-[-200px] left-[-200px]"></div>
+  <div class="absolute w-[700px] h-[700px] bg-purple-900/20 rounded-full blur-3xl bottom-[-200px] right-[-200px]"></div>
+
+  <div class="relative z-10 w-full max-w-md px-8">
+    <!-- Logo -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold tracking-tight">AI Finance</h1>
+      <p class="text-neutral-400 text-sm mt-3">Join the Future of Finance</p>
+    </div>
+
+    <!-- Glass Card -->
+    <div class="floating backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-12 shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+      <h2 class="text-3xl font-semibold mb-10">Create Account</h2>
+
+      <form id="signupForm">
+        <!-- Name -->
+        <input type="text" id="name" placeholder="Full name"
+          class="w-full mb-6 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
+                 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
+                 outline-none transition duration-300 placeholder:text-neutral-400" required>
+
+        <!-- Email -->
+        <input type="email" id="email" placeholder="Enter your email"
+          class="w-full mb-6 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
+                 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
+                 outline-none transition duration-300 placeholder:text-neutral-400" required>
+
+        <!-- Password -->
+        <input type="password" id="password" placeholder="Create password"
+          class="w-full mb-8 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
+                 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
+                 outline-none transition duration-300 placeholder:text-neutral-400" required>
+
+        <!-- Agreement -->
+        <div class="mb-6 flex items-start gap-3">
+          <input type="checkbox" id="agree" class="mt-1 w-5 h-5" required>
+          <label for="agree" class="text-sm text-neutral-400">
+            I agree to the Terms of Service and Privacy Policy
+          </label>
+        </div>
+
+        <!-- Sign Up Button -->
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-400 
+                   text-white font-semibold rounded-xl
+                   hover:shadow-[0_10px_30px_rgba(168,85,247,0.4)]
+                   transition duration-300 mb-6">
+          Create Account
+        </button>
+      </form>
+
+      <!-- Login Link -->
+      <p class="text-center text-neutral-400">
+        Already have an account? 
+        <a href="login.html" class="text-purple-400 hover:text-purple-300 font-semibold">Login</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-neutral-600 text-xs mt-8">
+      © 2026 AI Finance. All rights reserved.
+    </p>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const raw = await response.text();
+        let data = {};
+
+        if (raw) {
+          try {
+            data = JSON.parse(raw);
+          } catch {
+            throw new Error(`Server returned invalid JSON (HTTP ${response.status})`);
+          }
+        }
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'dashboard.html';
+        } else {
+          alert(data.error || `Sign up failed (HTTP ${response.status})`);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

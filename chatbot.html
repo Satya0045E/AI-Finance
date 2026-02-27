@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Financial Advisor - AI Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/10 px-6 py-6">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">AI Financial Advisor</h1>
+        <p class="text-neutral-400 text-sm mt-1">Get personalized financial guidance and investment advice</p>
+      </div>
+      <a href="dashboard.html" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+        Back to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Chat Area -->
+  <main class="max-w-4xl mx-auto px-6 py-12 h-[calc(100vh-180px)] flex flex-col">
+    
+    <!-- Chat Messages -->
+    <div id="chatContainer" class="flex-1 overflow-y-auto space-y-6 mb-8 bg-white/5 border border-white/10 rounded-3xl p-8">
+      <div class="bg-purple-600/20 border border-purple-600/30 p-6 rounded-2xl max-w-2xl">
+        <p class="text-neutral-300 leading-relaxed">
+          Hello! I'm your AI Financial Advisor. I can help you with:
+        </p>
+        <ul class="mt-4 space-y-2 text-neutral-400 text-sm">
+          <li>Stock recommendations and analysis</li>
+          <li>Portfolio optimization strategies</li>
+          <li>Market trend analysis and insights</li>
+          <li>Financial education and concepts</li>
+          <li>Risk management techniques</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 flex gap-4">
+      <input 
+        type="text" 
+        id="messageInput"
+        placeholder="Ask any finance-related question..." 
+        class="flex-1 px-6 py-3 bg-black/40 border border-white/10 rounded-xl focus:border-purple-500 outline-none transition placeholder:text-neutral-400"
+        onkeypress="handleKeyPress(event)"
+      >
+      <button 
+        onclick="sendMessage()" 
+        class="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-400 text-white font-semibold rounded-xl hover:shadow-[0_10px_30px_rgba(168,85,247,0.4)] transition"
+      >
+        Send
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    // Check authentication
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      const container = document.getElementById('chatContainer');
+
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'bg-purple-600/30 border border-purple-600/50 p-4 rounded-2xl max-w-2xl ml-auto';
+      userMsg.textContent = message;
+      container.appendChild(userMsg);
+
+      input.value = '';
+      input.focus();
+
+      try {
+        const response = await fetch('/api/chat/', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Chat request failed');
+        }
+
+        // Add AI response
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'bg-blue-600/20 border border-blue-600/30 p-4 rounded-2xl max-w-2xl';
+        const provider = data.provider === 'groq' ? 'Groq AI' : 'Local Finance Model';
+        aiMsg.innerHTML = `
+          <p class="text-neutral-300 leading-relaxed">${data.reply}</p>
+          <p class="text-neutral-500 text-xs mt-3 italic">Powered by ${provider}</p>
+        `;
+        container.appendChild(aiMsg);
+
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+      } catch (error) {
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'bg-red-600/20 border border-red-600/30 p-4 rounded-2xl max-w-2xl';
+        errorMsg.textContent = 'Error: ' + error.message;
+        container.appendChild(errorMsg);
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+
+</body>
+</html>

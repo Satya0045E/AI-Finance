@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio - AI Finance</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@keyframes floatCard {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+.float-card {
+  animation: floatCard 6s ease-in-out infinite;
+}
+</style>
+</head>
+
+<body class="bg-neutral-950 text-white min-h-screen">
+
+<div class="flex">
+
+  <!-- Sidebar -->
+  <aside class="hidden md:flex flex-col w-64 min-h-screen bg-black/40 backdrop-blur-xl border-r border-white/10 p-6">
+    <h1 class="text-2xl font-semibold mb-10">AI Finance</h1>
+    <nav class="space-y-6 text-lg">
+      <a href="dashboard.html" class="block hover:text-purple-400">Dashboard</a>
+      <a href="#" class="block text-purple-400">Portfolio</a>
+      <a href="#" class="block hover:text-purple-400">Markets</a>
+      <a href="#" class="block hover:text-purple-400">AI Advisor</a>
+      <a href="#" class="block hover:text-purple-400">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="sticky top-0 z-50 flex justify-between items-center px-6 md:px-10 py-6 
+                   border-b border-white/10 backdrop-blur-xl bg-black/40">
+      <div class="flex items-center gap-4">
+        <div class="md:hidden text-2xl">☰</div>
+        <h2 class="text-xl md:text-3xl font-semibold">Your Portfolio</h2>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="hidden sm:block text-neutral-400">Hello, User 👋</div>
+        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-semibold">
+          U
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="p-6 md:p-10 space-y-12">
+
+      <!-- Portfolio Summary -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg">
+          <p class="text-neutral-400">Total Value</p>
+          <h3 class="text-2xl font-semibold mt-2">₹12,45,000</h3>
+        </div>
+
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg">
+          <p class="text-neutral-400">Today's Gain</p>
+          <h3 class="text-2xl font-semibold text-green-400 mt-2">+₹15,200</h3>
+        </div>
+
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg">
+          <p class="text-neutral-400">Total Profit</p>
+          <h3 class="text-2xl font-semibold text-purple-400 mt-2">+₹2,10,000</h3>
+        </div>
+
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-lg">
+          <p class="text-neutral-400">Invested Amount</p>
+          <h3 class="text-2xl font-semibold mt-2">₹10,35,000</h3>
+        </div>
+
+      </section>
+
+      <!-- Holdings Table -->
+      <section class="float-card bg-white/5 backdrop-blur-xl border border-white/10 
+                      rounded-3xl p-8 shadow-lg overflow-x-auto">
+
+        <h3 class="text-xl md:text-2xl font-medium mb-6">Holdings</h3>
+
+        <table class="w-full text-left text-lg">
+          <thead class="text-neutral-400 border-b border-white/10">
+            <tr>
+              <th class="py-3">Stock</th>
+              <th class="py-3">Quantity</th>
+              <th class="py-3">Avg Price</th>
+              <th class="py-3">Current</th>
+              <th class="py-3">P/L</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/10">
+
+            <tr>
+              <td class="py-4">Reliance</td>
+              <td>50</td>
+              <td>₹2,300</td>
+              <td>₹2,450</td>
+              <td class="text-green-400">+₹7,500</td>
+            </tr>
+
+            <tr>
+              <td class="py-4">TCS</td>
+              <td>20</td>
+              <td>₹3,100</td>
+              <td>₹3,050</td>
+              <td class="text-red-400">-₹1,000</td>
+            </tr>
+
+            <tr>
+              <td class="py-4">HDFC Bank</td>
+              <td>40</td>
+              <td>₹1,500</td>
+              <td>₹1,620</td>
+              <td class="text-green-400">+₹4,800</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </section>
+
+      <!-- Portfolio Performance Chart -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-6">📊 Portfolio Performance (30 Days)</h3>
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+          <div style="height: 300px;">
+            <canvas id="portfolioChartCanvas"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Allocation + Performance -->
+      <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+
+        <!-- Allocation -->
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 
+                    rounded-3xl p-8 shadow-lg">
+
+          <h3 class="text-xl md:text-2xl font-medium mb-6">Asset Allocation</h3>
+
+          <div class="space-y-4 text-lg">
+            <div class="flex justify-between">
+              <span>Equity</span>
+              <span>70%</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Crypto</span>
+              <span>15%</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Mutual Funds</span>
+              <span>15%</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Performance -->
+        <div class="float-card bg-white/5 backdrop-blur-xl border border-white/10 
+                    rounded-3xl p-8 shadow-lg">
+
+          <h3 class="text-xl md:text-2xl font-medium mb-6">Performance</h3>
+
+          <div class="space-y-4 text-lg">
+            <div class="flex justify-between">
+              <span>1 Month</span>
+              <span class="text-green-400">+3.2%</span>
+            </div>
+            <div class="flex justify-between">
+              <span>6 Months</span>
+              <span class="text-purple-400">+12.5%</span>
+            </div>
+            <div class="flex justify-between">
+              <span>1 Year</span>
+              <span class="text-green-400">+24.8%</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>
+
+<script>
+  let portfolioChart = null;
+
+  // Load portfolio data
+  async function loadPortfolio() {
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/portfolio/', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      const portfolio = await response.json();
+      
+      // Update holdings table
+      const tbody = document.querySelector('tbody');
+      if (portfolio.holdings && portfolio.holdings.length > 0) {
+        tbody.innerHTML = portfolio.holdings.map(h => `
+          <tr>
+            <td class="py-4">${h.symbol}</td>
+            <td>${h.quantity}</td>
+            <td>$${h.buyPrice}</td>
+            <td>$${h.currentPrice}</td>
+            <td class="${(h.currentPrice - h.buyPrice) > 0 ? 'text-green-400' : 'text-red-400'}">
+              ${((h.currentPrice - h.buyPrice) * h.quantity > 0 ? '+' : '')}$${((h.currentPrice - h.buyPrice) * h.quantity).toFixed(2)}
+            </td>
+          </tr>
+        `).join('');
+      }
+      
+      // Load portfolio performance chart
+      loadPortfolioChart();
+    } catch (error) {
+      console.error('Error loading portfolio:', error);
+    }
+  }
+
+  async function loadPortfolioChart() {
+    try {
+      // Generate simulated portfolio performance data
+      const labels = [];
+      const data = [];
+      let value = 12450; // Starting value in thousands
+      
+      for (let i = 0; i < 30; i++) {
+        labels.push(`Day ${i + 1}`);
+        // Random walk for portfolio value
+        const change = (Math.random() - 0.48) * 100;
+        value = Math.max(12000, value + change);
+        data.push(Math.round(value));
+      }
+
+      const ctx = document.getElementById('portfolioChartCanvas');
+      if (!ctx) return;
+
+      if (portfolioChart) {
+        portfolioChart.destroy();
+      }
+
+      portfolioChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Portfolio Value',
+            data: data,
+            borderColor: '#8b5cf6',
+            backgroundColor: '#8b5cf620',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#8b5cf6',
+            pointBorderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: '#fff',
+                font: { size: 12, weight: '600' },
+                padding: 15,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              borderColor: '#666',
+              borderWidth: 1,
+              titleColor: '#fff',
+              bodyColor: '#ccc',
+              callbacks: {
+                label: function(context) {
+                  return 'Value: ₹' + context.parsed.y.toLocaleString();
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              display: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#999',
+                maxTicksLimit: 10
+              }
+            },
+            y: {
+              display: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#999',
+                callback: function(value) {
+                  return '₹' + value.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error loading portfolio chart:', error);
+    }
+  }
+
+  // Initialize
+  loadPortfolio();
+</script>
+
+</body>
+</html>

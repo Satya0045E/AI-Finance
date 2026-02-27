@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AI Finance Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+    @keyframes floatCard {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0px); }
+    }
+    .float-card { animation: floatCard 6s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen">
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside class="hidden md:flex flex-col w-64 min-h-screen bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 sticky top-0">
+    <div class="text-2xl font-bold text-purple-400 mb-10">💰 AI Finance</div>
+    <nav class="space-y-4 flex-1">
+      <a href="dashboard.html" class="block px-4 py-3 rounded-lg bg-purple-600/20 text-purple-300 font-semibold">📊 Dashboard</a>
+      <a href="prediction.html" class="block px-4 py-3 rounded-lg hover:bg-white/5 transition">🎯 Predictions</a>
+      <a href="dashboard.html#learning" class="block px-4 py-3 rounded-lg hover:bg-white/5 transition">📚 Learning</a>
+      <a href="dashboard.html#news" class="block px-4 py-3 rounded-lg hover:bg-white/5 transition">📰 News</a>
+      <a href="portfolio.html" class="block px-4 py-3 rounded-lg hover:bg-white/5 transition">💼 Portfolio</a>
+      <a href="chatbot.html" class="block px-4 py-3 rounded-lg hover:bg-white/5 transition">🤖 AI Advisor</a>
+    </nav>
+    <button onclick="logout()" class="w-full px-4 py-3 bg-red-600/20 text-red-300 rounded-lg hover:bg-red-600/30 transition">
+      Logout
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+    <!-- Top Navbar -->
+    <header class="sticky top-0 z-50 flex justify-between items-center px-6 md:px-10 py-6 border-b border-white/10 backdrop-blur-xl bg-black/40">
+      <h2 class="text-2xl md:text-3xl font-semibold">Welcome Back! 👋</h2>
+      <div class="flex items-center gap-4">
+        <span id="userName" class="text-neutral-400"></span>
+        <div id="userAvatar" class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-semibold">U</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="p-6 md:p-10 space-y-12 overflow-y-auto">
+
+      <!-- Market Overview -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-6">Market Overview</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div class="float-card bg-white/5 border border-white/10 rounded-2xl p-6">
+            <h4 class="text-neutral-400 text-sm">S&P 500</h4>
+            <p class="text-3xl font-bold mt-2">5,234.80</p>
+            <p class="text-green-400 text-sm mt-2">↑ +1.45%</p>
+          </div>
+          <div class="float-card bg-white/5 border border-white/10 rounded-2xl p-6">
+            <h4 class="text-neutral-400 text-sm">NASDAQ</h4>
+            <p class="text-3xl font-bold mt-2">16,852.30</p>
+            <p class="text-green-400 text-sm mt-2">↑ +2.10%</p>
+          </div>
+          <div class="float-card bg-white/5 border border-white/10 rounded-2xl p-6">
+            <h4 class="text-neutral-400 text-sm">BTC/USDT</h4>
+            <p class="text-3xl font-bold mt-2">$52,834</p>
+            <p class="text-green-400 text-sm mt-2">↑ +3.82%</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Overview -->
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Prediction Accuracy</p>
+          <p class="text-2xl font-bold mt-2">62%</p>
+          <div class="w-full bg-black/40 rounded-full h-2 mt-3">
+            <div class="bg-green-500 h-2 rounded-full" style="width: 62%"></div>
+          </div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Portfolio Value</p>
+          <p class="text-2xl font-bold mt-2">$45,230</p>
+          <p class="text-green-400 text-sm mt-2">↑ +5.2%</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Learning Progress</p>
+          <p class="text-2xl font-bold mt-2">75%</p>
+          <div class="w-full bg-black/40 rounded-full h-2 mt-3">
+            <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
+          </div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Active Predictions</p>
+          <p class="text-2xl font-bold mt-2">8</p>
+          <p class="text-purple-400 text-sm mt-2">In Progress</p>
+        </div>
+      </section>
+
+      <!-- Stock Comparison Chart -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-6">📈 Top Stocks Performance (30 Days)</h3>
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+          <div class="flex justify-end mb-4">
+            <select id="candleSymbol" class="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm">
+              <option value="AAPL">AAPL</option>
+              <option value="MSFT">MSFT</option>
+              <option value="GOOGL">GOOGL</option>
+              <option value="TSLA">TSLA</option>
+              <option value="AMZN">AMZN</option>
+              <option value="NVDA">NVDA</option>
+            </select>
+          </div>
+          <div style="height: 300px;">
+            <div id="stocksComparisonChart"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning Module Section -->
+      <section id="learning">
+        <h3 class="text-2xl font-semibold mb-6">📚 Learning Courses</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="coursesContainer">
+          <!-- Courses will be loaded here -->
+        </div>
+        <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h4 class="text-xl font-semibold">AI Learning Assistant</h4>
+              <p class="text-neutral-400 text-sm mt-1">Get topic summaries and practice questions instantly.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <select id="aiLearningTopic" class="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm">
+                <option value="technical-analysis">Technical Analysis</option>
+                <option value="stock-basics">Stock Basics</option>
+                <option value="portfolio-management">Portfolio Management</option>
+              </select>
+              <button id="loadAiPracticeBtn" class="px-4 py-2 rounded-lg bg-blue-600/80 hover:bg-blue-500 transition text-sm font-semibold">
+                Generate
+              </button>
+            </div>
+          </div>
+          <div id="aiLearningContainer" class="mt-5 space-y-4">
+            <!-- AI learning content will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Access Sections -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+          <h3 class="text-xl font-semibold mb-6">💼 Your Top Holdings</h3>
+          <div class="space-y-4" id="holdingsContainer">
+            <!-- Holdings will be loaded here -->
+          </div>
+          <a href="portfolio.html" class="text-purple-400 hover:text-purple-300 text-sm mt-4 inline-block">View Full Portfolio →</a>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+          <h3 class="text-xl font-semibold mb-6">📰 Latest Market News</h3>
+          <div class="space-y-3" id="newsContainer">
+            <!-- News will be loaded here -->
+          </div>
+          <a href="dashboard.html#news" class="text-purple-400 hover:text-purple-300 text-sm mt-4 inline-block">View All News →</a>
+        </div>
+      </section>
+
+      <!-- News Section -->
+      <section id="news">
+        <h3 class="text-2xl font-semibold mb-6">📰 Financial News Intelligence</h3>
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8" id="newsDetailContainer">
+          <!-- News details will be loaded here -->
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+</div>
+
+<script>
+  let stockChart = null;
+  let currentAiPractice = null;
+
+  // Load user data
+  function loadUserData() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    if (!user || !token) window.location.href = 'login.html';
+    document.getElementById('userName').textContent = user.name || 'User';
+    document.getElementById('userAvatar').textContent = (user.name || 'U')[0].toUpperCase();
+  }
+
+  async function loadStockComparisonChart() {
+    try {
+      const symbol = document.getElementById('candleSymbol')?.value || 'AAPL';
+      const response = await fetch(`/api/stocks/${symbol}`);
+      if (!response.ok) throw new Error('Failed to load candlestick data');
+      const stock = await response.json();
+
+      const container = document.getElementById('stocksComparisonChart');
+      if (!container) return;
+      const ohlc = stock.chart?.ohlc || [];
+      if (!ohlc.length) {
+        console.warn('No candlestick data available');
+        return;
+      }
+
+      const seriesData = ohlc.map((point, index) => ({
+        x: stock.chart?.labels?.[index] || point.t,
+        y: [point.o, point.h, point.l, point.c],
+      }));
+
+      if (stockChart) {
+        stockChart.destroy();
+      }
+
+      stockChart = new ApexCharts(container, {
+        chart: {
+          type: 'candlestick',
+          height: 300,
+          background: 'transparent',
+          toolbar: { show: false },
+          animations: { enabled: true },
+        },
+        series: [{ name: symbol, data: seriesData }],
+        theme: { mode: 'dark' },
+        xaxis: {
+          type: 'category',
+          tickPlacement: 'on',
+          labels: {
+            style: { colors: '#999' },
+            maxHeight: 20,
+          },
+        },
+        yaxis: {
+          labels: {
+            style: { colors: '#999' },
+            formatter: (val) => '$' + Number(val).toFixed(0),
+          },
+          tooltip: { enabled: true },
+        },
+        grid: { borderColor: 'rgba(255,255,255,0.08)' },
+        tooltip: { theme: 'dark' },
+        plotOptions: {
+          candlestick: {
+            colors: {
+              upward: '#22c55e',
+              downward: '#ef4444',
+            },
+          },
+        },
+      });
+      stockChart.render();
+    } catch (error) {
+      console.error('Error loading stock comparison chart:', error);
+    }
+  }
+
+  async function loadDashboard() {
+    const token = localStorage.getItem('token');
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
+    try {
+      await fetch('/api/dashboard', { headers: authHeaders });
+    } catch (error) {
+      console.warn('Dashboard summary request failed:', error);
+    }
+
+    displayPortfolio();
+    loadMarketOverview();
+    loadStockComparisonChart();
+    loadLearningSection(authHeaders);
+    loadNewsSection();
+  }
+
+  async function loadMarketOverview() {
+    try {
+      const response = await fetch('/api/market/overview');
+      if (!response.ok) throw new Error('Market overview unavailable');
+      const cards = await response.json();
+      if (!Array.isArray(cards) || cards.length < 3) return;
+
+      const marketSection = document.querySelector('main section');
+      if (!marketSection) return;
+      const cardEls = marketSection.querySelectorAll('.float-card');
+      if (!cardEls || cardEls.length < 3) return;
+
+      cards.slice(0, 3).forEach((card, idx) => {
+        const el = cardEls[idx];
+        if (!el) return;
+
+        const titleEl = el.querySelector('h4');
+        const valueEl = el.querySelector('p.text-3xl');
+        const changeEl = el.querySelector('p.text-sm');
+
+        if (titleEl) titleEl.textContent = card.title || '--';
+        if (valueEl) valueEl.textContent = card.value || '--';
+        if (changeEl) {
+          changeEl.textContent = `${card.trend === 'down' ? '↓' : '↑'} ${card.changeText || '0.00%'}`;
+          changeEl.className = `text-sm mt-2 ${card.trend === 'down' ? 'text-red-400' : 'text-green-400'}`;
+        }
+
+        let actionEl = el.querySelector('a.market-action-link');
+        if (!actionEl) {
+          actionEl = document.createElement('a');
+          actionEl.className = 'market-action-link inline-block mt-3 text-xs text-blue-300 hover:text-blue-200 transition';
+          el.appendChild(actionEl);
+        }
+        actionEl.href = card.actionUrl || '#';
+        actionEl.textContent = `${card.actionLabel || 'Open'} →`;
+      });
+    } catch (error) {
+      console.error('Error loading market overview:', error);
+    }
+  }
+
+  async function loadLearningSection(authHeaders) {
+    try {
+      let coursesResp = await fetch('/api/learning/courses', { headers: authHeaders });
+      if (!coursesResp.ok) {
+        coursesResp = await fetch('/api/learning', { headers: authHeaders });
+      }
+
+      if (!coursesResp.ok) {
+        throw new Error('Learning endpoint unavailable');
+      }
+
+      const coursesData = await coursesResp.json();
+      const courses = Array.isArray(coursesData) ? coursesData : [];
+      displayCourses(courses);
+    } catch (error) {
+      console.error('Error loading learning courses:', error);
+      displayCourses([]);
+    }
+
+    loadAiLearningPractice();
+  }
+
+  async function loadNewsSection() {
+    try {
+      const newsResp = await fetch('/api/news');
+      if (!newsResp.ok) {
+        throw new Error('News endpoint unavailable');
+      }
+
+      const newsData = await newsResp.json();
+      const news = Array.isArray(newsData) ? newsData : [];
+      displayNews(news);
+    } catch (error) {
+      console.error('Error loading news:', error);
+      displayNews([]);
+    }
+  }
+
+  function displayCourses(courses) {
+    const container = document.getElementById('coursesContainer');
+    if (!Array.isArray(courses) || courses.length === 0) {
+      container.innerHTML = `
+        <div class="md:col-span-3 bg-black/20 border border-white/10 rounded-xl p-6 text-neutral-300 text-sm">
+          No learning courses available right now.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = courses.map(course => `
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition">
+        <h4 class="font-semibold text-lg">${course.title}</h4>
+        <p class="text-neutral-400 text-sm mt-2">${course.completed}/${course.modules} modules</p>
+        <div class="w-full bg-black/40 rounded-full h-2 mt-3">
+          <div class="bg-purple-500 h-2 rounded-full" style="width: ${course.progress}%"></div>
+        </div>
+        <p class="text-purple-400 text-sm mt-2">${course.progress}% Complete</p>
+      </div>
+    `).join('');
+  }
+
+  async function loadAiLearningPractice() {
+    try {
+      const token = localStorage.getItem('token');
+      const topic = document.getElementById('aiLearningTopic')?.value || 'technical-analysis';
+      const container = document.getElementById('aiLearningContainer');
+      if (!container) return;
+
+      if (!token) {
+        container.innerHTML = '<p class="text-red-300 text-sm">Please login to use AI learning practice.</p>';
+        return;
+      }
+
+      const response = await fetch(`/api/learning/ai-practice?topic=${encodeURIComponent(topic)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        container.innerHTML = '<p class="text-red-300 text-sm">Unable to load AI practice right now.</p>';
+        return;
+      }
+
+      const practice = await response.json();
+      currentAiPractice = practice;
+      container.innerHTML = `
+        <div class="bg-black/30 border border-white/10 rounded-xl p-4">
+          <p class="text-blue-300 text-sm font-semibold">${practice.topic}</p>
+          <p class="text-neutral-300 text-sm mt-2">${practice.summary}</p>
+        </div>
+        ${(practice.questions || []).map((item, idx) => `
+          <div class="bg-black/20 border border-white/10 rounded-xl p-4">
+            <p class="font-semibold text-sm">Q${idx + 1}. ${item.question}</p>
+            <div class="mt-3 space-y-2 text-sm text-neutral-300">
+              ${item.options.map((option, optionIdx) => `
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="aiq-${idx}" value="${optionIdx}" class="accent-blue-500" />
+                  <span>${option}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2 rounded-lg bg-emerald-600/80 hover:bg-emerald-500 transition text-sm font-semibold" onclick="submitAiQuiz()">
+            Submit Quiz
+          </button>
+          <p id="aiQuizScore" class="text-sm text-neutral-300"></p>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error loading AI learning practice:', error);
+    }
+  }
+
+  function submitAiQuiz() {
+    const questions = currentAiPractice?.questions || [];
+    if (!questions.length) return;
+
+    let correct = 0;
+    questions.forEach((question, qIndex) => {
+      const selected = document.querySelector(`input[name="aiq-${qIndex}"]:checked`);
+      if (!selected) return;
+      const selectedValue = Number(selected.value);
+      const selectedOption = question.options[selectedValue];
+      if (selectedOption === question.answer) {
+        correct += 1;
+      }
+    });
+
+    const scoreEl = document.getElementById('aiQuizScore');
+    if (!scoreEl) return;
+    scoreEl.textContent = `Score: ${correct}/${questions.length}`;
+  }
+
+  function displayNews(news) {
+    const container = document.getElementById('newsContainer');
+    if (!Array.isArray(news) || news.length === 0) {
+      container.innerHTML = `
+        <div class="p-3 bg-black/20 rounded-lg text-neutral-400 text-sm">
+          No news available right now.
+        </div>
+      `;
+      const detailContainer = document.getElementById('newsDetailContainer');
+      detailContainer.innerHTML = `
+        <div class="text-neutral-400 text-sm">No detailed news available right now.</div>
+      `;
+      return;
+    }
+
+    container.innerHTML = news.slice(0, 3).map(item => `
+      <div class="p-3 bg-black/20 rounded-lg">
+        <p class="font-semibold text-sm">${item.title}</p>
+        <p class="text-neutral-400 text-xs mt-1">Impact: <span class="text-orange-400">${item.impact}</span></p>
+      </div>
+    `).join('');
+
+    const detailContainer = document.getElementById('newsDetailContainer');
+    detailContainer.innerHTML = news.map(item => `
+      <div class="bg-black/20 border border-white/5 rounded-xl p-6 mb-4">
+        <h4 class="font-semibold">${item.title}</h4>
+        <p class="text-neutral-400 text-sm mt-2">
+          Impact: <span class="px-2 py-1 rounded bg-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-500/20 text-${item.impact === 'Positive' ? 'green' : item.impact === 'Negative' ? 'red' : 'yellow'}-400">${item.impact}</span>
+        </p>
+        <p class="text-neutral-400 text-sm mt-2">Affected Stocks: ${Array.isArray(item.affectedStocks) ? item.affectedStocks.join(', ') : 'N/A'}</p>
+      </div>
+    `).join('');
+  }
+
+  function displayPortfolio() {
+    const holdings = [
+      { symbol: 'AAPL', name: 'Apple Inc.', value: 15230, change: '+4.5%' },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', value: 12450, change: '-1.2%' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', value: 10350, change: '+2.1%' }
+    ];
+    
+    const container = document.getElementById('holdingsContainer');
+    container.innerHTML = holdings.map(h => `
+      <div class="flex justify-between items-center py-3 border-b border-white/5">
+        <div>
+          <p class="font-semibold">${h.symbol}</p>
+          <p class="text-neutral-400 text-sm">${h.name}</p>
+        </div>
+        <div class="text-right">
+          <p class="font-semibold">$${h.value.toLocaleString()}</p>
+          <p class="text-${h.change.includes('+') ? 'green' : 'red'}-400 text-sm">${h.change}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+
+  // Initialize
+  loadUserData();
+  loadDashboard();
+  document.getElementById('candleSymbol')?.addEventListener('change', loadStockComparisonChart);
+  document.getElementById('loadAiPracticeBtn')?.addEventListener('click', loadAiLearningPractice);
+</script>
+
+</body>
+</html>

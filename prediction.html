@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Prediction Playground - AI Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen">
+
+<div class="min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/10 px-6 py-6">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">🎯 Stock Prediction Playground</h1>
+        <p class="text-neutral-400 text-sm mt-1">Predict stock movements and compare with AI analysis</p>
+      </div>
+      <a href="dashboard.html" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+        Back to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-12 space-y-12">
+
+    <!-- Prediction Input Section -->
+    <section class="bg-white/5 border border-white/10 rounded-3xl p-8">
+      <h2 class="text-2xl font-semibold mb-8">Make a Prediction</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Stock Symbol Input -->
+        <div>
+          <label class="block text-neutral-400 text-sm mb-2">Stock Symbol</label>
+          <select id="symbol" class="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:border-purple-500 outline-none">
+            <option value="AAPL">AAPL - Apple</option>
+            <option value="MSFT">MSFT - Microsoft</option>
+            <option value="GOOGL">GOOGL - Alphabet</option>
+            <option value="TSLA">TSLA - Tesla</option>
+            <option value="AMZN">AMZN - Amazon</option>
+            <option value="NVDA">NVDA - NVIDIA</option>
+          </select>
+        </div>
+
+        <!-- Current Price Display -->
+        <div>
+          <label class="block text-neutral-400 text-sm mb-2">Current Price</label>
+          <div class="px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-xl font-semibold">
+            <span id="currentPrice">$150.50</span>
+          </div>
+        </div>
+
+        <!-- Prediction Confidence -->
+        <div>
+          <label class="block text-neutral-400 text-sm mb-2">Your Confidence</label>
+          <input type="range" id="confidence" min="1" max="100" value="50" class="w-full">
+          <p class="text-sm text-purple-400 mt-2 text-center"><span id="confValue">50</span>%</p>
+        </div>
+      </div>
+
+      <!-- Prediction Buttons -->
+      <div class="flex gap-4 mb-8">
+        <button onclick="submitPrediction('UP')" class="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-green-500 
+                   hover:shadow-[0_8px_25px_rgba(34,197,94,0.4)] 
+                   rounded-xl font-semibold transition">
+          📈 Predict UP
+        </button>
+        <button onclick="submitPrediction('DOWN')" class="flex-1 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 
+                   hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] 
+                   rounded-xl font-semibold transition">
+          📉 Predict DOWN
+        </button>
+      </div>
+
+      <p class="text-neutral-400 text-sm">Make your prediction and we'll compare it with AI-generated analysis</p>
+      <div class="mt-6 bg-black/40 border border-white/10 rounded-2xl p-5">
+        <p class="text-neutral-400 text-sm">ML Forecast (Selected Stock)</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-2">
+          <p class="text-xl font-semibold">
+            Direction: <span id="modelPred" class="text-blue-400">UP</span>
+          </p>
+          <p class="text-neutral-300 text-sm">
+            Confidence: <span id="modelConf" class="text-blue-300">--</span>%
+          </p>
+        </div>
+        <p id="modelRationale" class="text-neutral-400 text-sm mt-2">Loading model forecast...</p>
+      </div>
+    </section>
+
+    <!-- Stock Price Chart -->
+    <section class="bg-white/5 border border-white/10 rounded-3xl p-8">
+      <h2 class="text-2xl font-semibold mb-6">📈 Stock Price History (30 Days)</h2>
+      <div class="bg-black/40 rounded-2xl p-6">
+        <div id="priceChart" style="height: 320px;"></div>
+      </div>
+    </section>
+
+    <!-- Stock Information -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+        <h3 class="text-xl font-semibold mb-6">Stock Information</h3>
+        <div id="stockInfo" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Name</span>
+            <span id="infoName" class="font-semibold">Apple Inc.</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Day Change</span>
+            <span id="infoDayChange" class="font-semibold text-green-400">+2.45%</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Year High</span>
+            <span id="infoYearHigh" class="font-semibold">$199.62</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Year Low</span>
+            <span id="infoYearLow" class="font-semibold">$124.17</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+        <h3 class="text-xl font-semibold mb-6">Technical Metrics</h3>
+        <div id="metrics" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Market Cap</span>
+            <span id="metricMktCap" class="font-semibold">$2.8T</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">P/E Ratio</span>
+            <span id="metricPE" class="font-semibold">28.5</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Dividend Yield</span>
+            <span id="metricDividend" class="font-semibold">0.42%</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Sector</span>
+            <span id="metricSector" class="font-semibold">Technology</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prediction Results -->
+    <section id="resultsSection" class="hidden bg-white/5 border border-white/10 rounded-3xl p-8">
+      <h2 class="text-2xl font-semibold mb-8">Prediction Results</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Your Prediction -->
+        <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Your Prediction</p>
+          <p id="yourPred" class="text-3xl font-bold mt-2 text-purple-400">UP</p>
+          <p class="text-neutral-400 text-sm mt-2">Confidence: <span id="yourConf">75</span>%</p>
+        </div>
+
+        <!-- AI Prediction -->
+        <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">AI Prediction</p>
+          <p id="aiPred" class="text-3xl font-bold mt-2 text-blue-400">UP</p>
+          <p class="text-neutral-400 text-sm mt-2">Confidence: <span id="aiConf">82</span>%</p>
+        </div>
+
+        <!-- Actual Result -->
+        <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p class="text-neutral-400 text-sm">Actual Result</p>
+          <p id="actualResult" class="text-3xl font-bold mt-2 text-green-400">DOWN</p>
+          <p id="resultStatus" class="text-neutral-400 text-sm mt-2">Market moved -2.3%</p>
+        </div>
+      </div>
+
+      <!-- Explanation Section -->
+      <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+        <h3 class="font-semibold text-lg mb-4">📊 Analysis & Explanation</h3>
+        <p id="explanation" class="text-neutral-400 leading-relaxed">
+          Loading explanation...
+        </p>
+        <p id="aiInsight" class="text-neutral-300 mt-4 pl-4 border-l-2 border-purple-500 italic">
+          
+        </p>
+      </div>
+
+      <!-- Success/Failure Badge -->
+      <div class="mt-8 text-center">
+        <div id="resultBadge" class="inline-block px-6 py-3 rounded-full text-lg font-semibold">
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- Prediction History -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-6">📜 Your Prediction History</h2>
+      <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-black/40 border-b border-white/10">
+              <tr>
+                <th class="px-6 py-4 text-left text-neutral-400 font-semibold">Stock</th>
+                <th class="px-6 py-4 text-left text-neutral-400 font-semibold">Your Pred</th>
+                <th class="px-6 py-4 text-left text-neutral-400 font-semibold">AI Pred</th>
+                <th class="px-6 py-4 text-left text-neutral-400 font-semibold">Actual</th>
+                <th class="px-6 py-4 text-left text-neutral-400 font-semibold">Result</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable" class="divide-y divide-white/10">
+              <tr class="hover:bg-white/5 transition">
+                <td class="px-6 py-4">AAPL</td>
+                <td class="px-6 py-4"><span class="text-green-400">UP</span></td>
+                <td class="px-6 py-4"><span class="text-green-400">UP</span></td>
+                <td class="px-6 py-4"><span class="text-green-400">UP (+1.2%)</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">✓ Correct</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  let priceChart = null;
+
+  // Load stock data when page loads
+  async function loadStockData() {
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const symbol = document.getElementById('symbol').value;
+    await loadStockInfo(symbol);
+    await loadPriceChart(symbol);
+    await loadModelPrediction(symbol);
+    loadPredictionHistory();
+  }
+
+  async function loadModelPrediction(symbol) {
+    try {
+      const response = await fetch(`/api/predictions/model/${symbol}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to load model forecast');
+      }
+
+      const forecast = await response.json();
+      document.getElementById('modelPred').textContent = forecast.aiPrediction || '?';
+      document.getElementById('modelPred').className =
+        forecast.aiPrediction === 'UP' ? 'text-green-400' : 'text-red-400';
+      document.getElementById('modelConf').textContent = forecast.aiConfidence ?? '--';
+      document.getElementById('modelRationale').textContent =
+        forecast.rationale || 'Model forecast generated from trend and sentiment features.';
+    } catch (error) {
+      console.error('Error loading model prediction:', error);
+      document.getElementById('modelPred').textContent = '?';
+      document.getElementById('modelConf').textContent = '--';
+      document.getElementById('modelRationale').textContent = 'Unable to load model forecast right now.';
+    }
+  }
+
+  // Load stock information
+  async function loadStockInfo(symbol) {
+    try {
+      const response = await fetch(`/api/stocks/${symbol}`);
+      const stock = await response.json();
+
+      // Update current price
+      document.getElementById('currentPrice').textContent = `$${stock.currentPrice}`;
+
+      // Update stock info
+      document.getElementById('infoName').textContent = stock.name;
+      document.getElementById('infoDayChange').textContent = 
+        `${stock.dayChange > 0 ? '+' : ''}${stock.dayChangePercent}%`;
+      document.getElementById('infoDayChange').className = 
+        `font-semibold ${stock.dayChange > 0 ? 'text-green-400' : 'text-red-400'}`;
+      document.getElementById('infoYearHigh').textContent = `$${stock.yearHigh}`;
+      document.getElementById('infoYearLow').textContent = `$${stock.yearLow}`;
+
+      // Update metrics
+      document.getElementById('metricMktCap').textContent = stock.marketCap;
+      document.getElementById('metricPE').textContent = stock.peRatio;
+      document.getElementById('metricDividend').textContent = stock.dividendYield + '%';
+      document.getElementById('metricSector').textContent = stock.sector;
+    } catch (error) {
+      console.error('Error loading stock info:', error);
+    }
+  }
+
+  // Load price chart
+  async function loadPriceChart(symbol) {
+    try {
+      const response = await fetch(`/api/stocks/${symbol}`);
+      const stock = await response.json();
+      const chartData = stock.chart || {};
+      const ohlc = chartData.ohlc || [];
+      const container = document.getElementById('priceChart');
+      if (!container || !ohlc.length) return;
+
+      if (priceChart) {
+        priceChart.destroy();
+      }
+
+      const seriesData = ohlc.map((point, index) => ({
+        x: chartData.labels?.[index] || point.t,
+        y: [point.o, point.h, point.l, point.c],
+      }));
+
+      priceChart = new ApexCharts(container, {
+        chart: {
+          type: 'candlestick',
+          height: 300,
+          background: 'transparent',
+          toolbar: { show: false },
+        },
+        series: [{ name: `${symbol} OHLC`, data: seriesData }],
+        theme: { mode: 'dark' },
+        xaxis: {
+          type: 'category',
+          tickPlacement: 'on',
+          labels: { style: { colors: '#9ca3af' }, maxHeight: 20 },
+        },
+        yaxis: {
+          labels: {
+            style: { colors: '#9ca3af' },
+            formatter: (val) => '$' + Number(val).toFixed(2),
+          },
+        },
+        grid: { borderColor: 'rgba(255,255,255,0.10)' },
+        plotOptions: {
+          candlestick: {
+            colors: {
+              upward: '#22c55e',
+              downward: '#ef4444',
+            },
+          },
+        },
+      });
+      priceChart.render();
+    } catch (error) {
+      console.error('Error loading chart:', error);
+    }
+  }
+
+  // Update confidence display
+  document.getElementById('confidence').addEventListener('input', (e) => {
+    document.getElementById('confValue').textContent = e.target.value;
+  });
+
+  // Update chart when symbol changes
+  document.getElementById('symbol').addEventListener('change', loadStockData);
+
+  async function submitPrediction(direction) {
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const symbol = document.getElementById('symbol').value;
+    const confidence = document.getElementById('confidence').value;
+
+    try {
+      const response = await fetch('/api/predictions/', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          symbol, 
+          userPrediction: direction
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Prediction request failed');
+      }
+      displayResults(data, direction, confidence);
+    } catch (error) {
+      alert('Error submitting prediction: ' + error.message);
+    }
+  }
+
+  function displayResults(data, userPred, confidence) {
+    document.getElementById('resultsSection').classList.remove('hidden');
+    const analysis = data.analysis || {};
+
+    // Update prediction displays
+    document.getElementById('yourPred').textContent = userPred;
+    document.getElementById('yourConf').textContent = confidence;
+    document.getElementById('aiPred').textContent = data.aiPrediction || '?';
+    document.getElementById('aiConf').textContent = data.aiConfidence || '?';
+    document.getElementById('actualResult').textContent = data.actualResult || '?';
+    document.getElementById('resultStatus').textContent = `Market moved ${Number(data.priceChange || 0).toFixed(2)}%`;
+    document.getElementById('explanation').textContent =
+      analysis.summary || data.explanation || 'Analysis unavailable';
+
+    // Add AI insight
+    document.getElementById('aiInsight').textContent =
+      `${analysis.rationale || 'Model factors unavailable.'} Horizon: ${analysis.horizon || 'Next session'}. Volatility risk: ${analysis.volatilityRisk ?? '--'}/100.`;
+
+    // Show success/failure badge
+    const badge = document.getElementById('resultBadge');
+    if (data.isCorrect) {
+      badge.textContent = '🎉 Correct Prediction! +1 Point';
+      badge.className = 'inline-block px-6 py-3 rounded-full text-lg font-semibold bg-green-500/20 text-green-400';
+    } else {
+      badge.textContent = '📚 Incorrect. Learn & Try Again';
+      badge.className = 'inline-block px-6 py-3 rounded-full text-lg font-semibold bg-blue-500/20 text-blue-400';
+    }
+
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Load predictions on page load
+  async function loadPredictionHistory() {
+    if (!localStorage.getItem('token')) return;
+    
+    try {
+      const response = await fetch('/api/predictions/', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const predictions = await response.json();
+      
+      const tbody = document.getElementById('historyTable');
+      tbody.innerHTML = predictions.slice(0, 10).map((p) => `
+        <tr class="hover:bg-white/5 transition">
+          <td class="px-6 py-4">${p.symbol}</td>
+          <td class="px-6 py-4"><span class="${p.userPrediction === 'UP' ? 'text-green-400' : 'text-red-400'}">${p.userPrediction}</span></td>
+          <td class="px-6 py-4"><span class="${p.aiPrediction === 'UP' ? 'text-green-400' : 'text-red-400'}">${p.aiPrediction}</span></td>
+          <td class="px-6 py-4"><span class="${p.actualResult === 'UP' ? 'text-green-400' : 'text-red-400'}">${p.actualResult} (${p.priceChange}%)</span></td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${p.isCorrect ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'} rounded-full text-sm">${p.isCorrect ? '✓ Correct' : '✗ Missed'}</span></td>
+        </tr>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading history:', error);
+    }
+  }
+
+  // Load on page load
+  if (localStorage.getItem('token')) {
+    loadStockData(); // Load initial stock data
+    loadPredictionHistory();
+  } else {
+    window.location.href = 'login.html';
+  }
+</script>
+
+</body>
+</html>
