@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - AI Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    .floating {
+      animation: float 7s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-neutral-950 text-white min-h-screen flex items-center justify-center relative overflow-hidden">
+
+  <!-- Background Glow -->
+  <div class="absolute w-[800px] h-[800px] bg-purple-700/20 rounded-full blur-3xl top-[-200px] left-[-200px]"></div>
+  <div class="absolute w-[700px] h-[700px] bg-purple-900/20 rounded-full blur-3xl bottom-[-200px] right-[-200px]"></div>
+
+  <div class="relative z-10 w-full max-w-2xl px-8">
+
+    <!-- Logo -->
+    <div class="text-center mb-16">
+      <h1 class="text-6xl font-semibold tracking-wide">AI Finance</h1>
+      <p class="text-neutral-400 text-xl mt-5">
+        Intelligent Financial Intelligence Platform
+      </p>
+    </div>
+
+    <!-- Glass Card -->
+    <div
+      class="floating backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+
+      <h2 class="text-4xl font-medium mb-12">Welcome Back</h2>
+
+      <!-- Email -->
+      <input type="email" id="email" placeholder="Enter your email" required class="w-full mb-6 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
+             focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
+             outline-none transition duration-300 placeholder:text-neutral-400">
+
+      <!-- Password -->
+      <input type="password" id="password" placeholder="Enter your password" required class="w-full mb-8 px-5 py-3 text-lg bg-black/40 border border-white/10 rounded-xl 
+             focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50
+             outline-none transition duration-300 placeholder:text-neutral-400">
+
+      <!-- Error Message -->
+      <div id="errorMsg"
+        class="w-full mb-6 px-4 py-3 hidden text-red-300 bg-red-500/20 border border-red-500/30 rounded-xl text-sm">
+      </div>
+
+      <!-- Login Button -->
+      <button onclick="handleLogin(event)" id="loginBtn" class="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-400 
+                   text-white font-semibold rounded-xl
+                   hover:shadow-[0_10px_30px_rgba(168,85,247,0.4)]
+                   transition duration-300 mb-6">
+        Login
+      </button>
+
+    </div>
+
+    <p class="text-center text-neutral-400">
+      Don't have an account?
+      <a href="sign-up.html" class="text-purple-400 hover:text-purple-300 font-semibold">Sign up</a>
+    </p>
+
+    <!-- Footer -->
+    <p class="text-center text-neutral-600 text-xs mt-8">
+      Â© 2026 AI Finance. All rights reserved.
+    </p>
+
+  </div>
+
+  <script>
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const loginBtn = document.getElementById('loginBtn');
+
+      // Validation
+      if (!email || !password) {
+        errorMsg.textContent = 'Please enter both email and password';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+
+      errorMsg.classList.add('hidden');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'dashboard.html';
+        } else {
+          errorMsg.textContent = data.error || 'Login failed. Check your credentials.';
+          errorMsg.classList.remove('hidden');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Login';
+        }
+      } catch (error) {
+        errorMsg.textContent = 'Connection error. Make sure the server is running. Error: ' + error.message;
+        errorMsg.classList.remove('hidden');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+        console.error('Login error:', error);
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin(e);
+      });
+    });
+  </script>
+
+</body>
+
+</html>
